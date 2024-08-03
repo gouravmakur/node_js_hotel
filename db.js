@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
-// Correcting the connection string to remove any leading/trailing spaces
-const mongoURL = 'mongodb://127.0.0.1:27017/students';
+const mongoURL = process.env.MONGODB_URL;
 
-// Setup MongoDB connection
-mongoose.connect(mongoURL);
+mongoose.connect(mongoURL, {
+  tls: true,
+  tlsAllowInvalidCertificates: true, // Only for testing, remove in production
+});
 
 const db = mongoose.connection;
 
