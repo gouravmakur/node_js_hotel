@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const mongoURL = process.env.MONGODB_URL;
+//const mongoURL = process.env.MONGODB_URL;
+const mongoURL = process.env.MONGODBLocal_URL;
 
-mongoose.connect(mongoURL, {
-  tls: true,
-  tlsAllowInvalidCertificates: true, // Only for testing, remove in production
-});
+
+mongoose.connect(mongoURL);
 
 const db = mongoose.connection;
 
