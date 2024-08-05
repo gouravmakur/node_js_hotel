@@ -17,14 +17,15 @@ const PORT  = process.env.PORT || 3000;
 
 app.use(passport.initialize());
 
-const localAuthMiddleware = passport.authenticate('local', {session: false});
+const localAuthMiddleware = passport.authenticate('local', { session: false });
+
 
 app.get('/', function (req, res) {
   res.send('Welcome To My Hotel')
 })
 
 const personRoutes = require('./Routes/personRoutes');
-app.use('/person',localAuthMiddleware, personRoutes);
+app.use('/person', localAuthMiddleware, personRoutes);
 
 const menuRoute = require('./Routes/menuRoutes');
 app.use('/menu', menuRoute);
