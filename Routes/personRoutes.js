@@ -1,10 +1,10 @@
 const express = require('express');
-
 const router = express.Router();
 const Person = require('../models/person');
+const {jwtTokenMiddleware, genrateToken} = require('../jwt');
 
 // POST route to create a new person
-router.post('/', async (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
         const data = req.body;
 
@@ -13,7 +13,16 @@ router.post('/', async (req, res) => {
 
         const response = await newPerson.save();
         console.log('Data saved');
-        res.status(201).json(response);  // Use 201 status code for created resources
+
+        const payload = {
+            id : response.id,
+            username : response.username
+        }
+
+        const token = genrateToken(payload);
+        console.log("Token is " , token);
+
+        res.status(201).json({response:response , token : token});  // Use 201 status code for created resources
 
     } catch (error) {
         console.log(error);
@@ -21,8 +30,60 @@ router.post('/', async (req, res) => {
     }
 });
 
+
+//LogIn route
+
+router.post('/login', async (req , res) =>{
+
+    try {
+        
+        //extract info
+        const {username , password} = req.body;
+
+        //find in databas
+        const user = await Person.findOne({username : username});
+
+        if(!user || !(await user.comparePassword(password))){
+            return res.status(401).json({error : 'Invalid username or password'});
+        }
+
+        const payload = {
+            id : user.id,
+            username : user.username
+        }
+
+        const token = genrateToken(payload);
+
+        res.json({token});
+
+    } catch (error) {
+        
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+
+});
+
+router.get('/profile', jwtTokenMiddleware, async(req,res) =>{
+
+    try {
+        
+        const userData = req.user;
+        const userId = userData.id;
+
+        const user = await Person.findById(userId);
+
+        res.status(200).json({user});
+
+    } catch (error) {
+        
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // GET route to fetch all persons
-router.get('/', async (req, res) => {
+router.get('/', jwtTokenMiddleware ,async (req, res) => {
     try {
         const data = await Person.find();
         console.log('Data fetched');
